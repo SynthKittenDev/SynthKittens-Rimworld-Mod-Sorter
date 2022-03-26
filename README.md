@@ -3,7 +3,7 @@ This application will automagically rename all of the Mods in your Rimworld Stea
 
 # Tutorial
 
-1. Download the Application from the 'Releases' section.
+1. Download the Application from the '[Releases](https://github.com/Donut-Cat/SynthKittens-Rimworld-Mod-Sorter/releases)' section.
 2. Run the application, you may need to run it as administrator IF the program is unable to write files.
 3. Your good to go! Everything should be done for you.
 
