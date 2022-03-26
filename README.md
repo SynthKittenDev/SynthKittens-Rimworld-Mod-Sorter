@@ -1,5 +1,5 @@
 # SynthKitten's Rimworld Mod Sorter
-This application will automagically rename all of the Mods in your Rimworld Steam Workshop folder.
+This application will automagically rename all of the Mods in your Rimworld Steam Workshop folder. (.NET Framework 4.7.2 Required)
 
 # Tutorial
 
