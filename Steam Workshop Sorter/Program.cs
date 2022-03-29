@@ -4,6 +4,7 @@ using System.IO;
 using System.Net;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Xml;
 
 namespace Steam_Workshop_Sorter
 {
@@ -12,7 +13,7 @@ namespace Steam_Workshop_Sorter
 
         public static string bordertop = "╔═════════════════════════════════════════════════════════════════╗"; // Decorative Bar
         public static string borderbottom = "╚═════════════════════════════════════════════════════════════════╝"; // Decorative Bar
-        public static string title = "[ Steam Workshop Sorter v1.0 ]"; // Application Title
+        public static string title = "[ Steam Workshop Sorter v1.1 ]"; // Application Title
         public static string text = ""; // Empty string used for general text
         public static string choice = ""; // Empty string used for answering Y/N
         public static string ModInfo = ""; // For mod title / information
@@ -20,6 +21,9 @@ namespace Steam_Workshop_Sorter
         public static string SteamInstallPath = ""; // Steam Install Directory
         public static string workshopPath = ""; // Steam Install Directory + Workshop Path
         public static string currentBackupDirectory = ""; // Directory to backup mods beore renaming
+        public static string RimworldDirectory = ""; // Rimworld Workshop Directory
+
+        public static Boolean WiFi = true; // Check if user is connected to wifi
 
         public static int ID = 0;
         static void Main(string[] args)
@@ -137,7 +141,7 @@ namespace Steam_Workshop_Sorter
             try
             {
 
-                string RimworldDirectory = workshopPath + @"\294100";
+                RimworldDirectory = workshopPath + @"\294100";
 
                 if (Directory.Exists(workshopPath + "\\Renamed_Mods_" + unixSeconds))
                 {
@@ -153,8 +157,9 @@ namespace Steam_Workshop_Sorter
                     RenameMods();
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                LogError(ex.Message + "\n");
                 currentBackupDirectory = workshopPath + "\\Renamed_Mods_" + unixSeconds;
                 RenameMods();
             }
@@ -183,7 +188,17 @@ namespace Steam_Workshop_Sorter
 
                     string Parsed = RemoveSpecialCharacters(RealModName);
 
-                    Directory.Move(ModFolders, ModFolders + "_" + Parsed.Replace(" ", "_"));
+                    try
+                    {
+                        Directory.Move(ModFolders, ModFolders + "_" + Parsed.Replace(" ", "_"));
+                    }
+                    catch (Exception ex)
+                    {
+                        LogError(ex.Message + "\n");
+                        Console.WriteLine("");
+                        Console.WriteLine(String.Format("{0," + ((Console.WindowWidth / 2) + (ex.Message.Length / 2)) + "}", ex.Message));
+                        Console.ReadKey();
+                    }
 
                 }
                 else
@@ -220,18 +235,87 @@ namespace Steam_Workshop_Sorter
         public static string GetModInfo(string ModName)
         {
             WebClient client = new WebClient();
-            string ModInfoHTML = client.DownloadString("https://steamcommunity.com/sharedfiles/filedetails/?id=" + ModName);
+            string ModInfoHTML = "";
 
-            Console.Clear();
-            WriteTitle();
+            try
+            {
+                if (WiFi == true)
+                {
+                    // ** This section handles downloading the mod title from the steam workshop website **
+                    ModInfoHTML = client.DownloadString("https://steamcommunity.com/sharedfiles/filedetails/?id=" + ModName);
 
-            ModInfo = GetStringBetweenCharacters(ModInfoHTML, "<title>Steam Workshop::", "</title>");
+                    Console.Clear();
+                    WriteTitle();
 
-            Console.WriteLine("");
-            text = ModInfo;
-            Console.WriteLine(String.Format("{0," + ((Console.WindowWidth / 2) + (text.Length / 2)) + "}", text));
+                    ModInfo = GetStringBetweenCharacters(ModInfoHTML, "<title>Steam Workshop::", "</title>");
+
+                    Console.WriteLine("");
+                    text = ModInfo;
+                    Console.WriteLine(String.Format("{0," + ((Console.WindowWidth / 2) + (text.Length / 2)) + "}", text));
+
+                    return ModInfo;
+                }
+                else if (WiFi == false)
+                {
+                    // We presume that an internet connection could not be achieved, so we instead use the local 'about.xml' file.
+
+                    string ModAboutXML = RimworldDirectory + @"\" + ModName + @"\About\About.xml"; // Get about.xml file of mod
+
+                    if (File.Exists(ModAboutXML)) // Check if about.xml file exists in set directory and do stuff
+                    {
+
+                        string AboutFile = File.ReadAllText(ModAboutXML);
+
+                        ModInfo = GetStringBetweenCharacters(AboutFile, "<name>", "</name>");
+
+                        Console.Clear();
+                        WriteTitle();
+
+                        Console.WriteLine("");
+                        text = ModInfo;
+                        Console.WriteLine(String.Format("{0," + ((Console.WindowWidth / 2) + (text.Length / 2)) + "}", text));
+
+                        return ModInfo;
+
+                    }
+                    else
+                    {
+                        // No mod file found, alert user and continue with other mods.
+
+                        Console.Clear();
+                        WriteTitle();
+
+                        text = ModAboutXML;
+                        Console.ForegroundColor = ConsoleColor.Red;
+
+                        text = "Warning: Could not find 'About.xml' file for mod: " + ModName + ".";
+                        LogError(text + "\n");
+                        Console.WriteLine("");
+                        Console.WriteLine(String.Format("{0," + ((Console.WindowWidth / 2) + (text.Length / 2)) + "}", text));
+                        Console.WriteLine("");
+                        text = "Skipping mod folder..";
+                        Console.WriteLine(String.Format("{0," + ((Console.WindowWidth / 2) + (text.Length / 2)) + "}", text));
+
+                        ModInfo = "";
+
+                        return ModInfo;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // The user failed to download the required information from the mod page! Swap to offline mode..
+                WiFi = false; // Set wifi to false
+                LogError(ex.Message + "\n");
+                GetModInfo(ModName); // Restart GetModInfo with new variable
+            }
 
             return ModInfo;
+        }
+
+        public static void LogError(string log)
+        {
+            File.AppendAllText("SteamSorter_Log.txt", log);
         }
 
         public static string GetStringBetweenCharacters(string input, string charFrom, string charTo)

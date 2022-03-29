@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Steam Workshop Sorter")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("Rimworld Steam Workshop Sorter")]
+[assembly: AssemblyDescription("Automagically sorts your Rimworld mods and renames them. Developed by SynthKitten.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("Steam Workshop Sorter")]
+[assembly: AssemblyProduct("Rimworld Steam Workshop Sorter")]
 [assembly: AssemblyCopyright("Copyright ©  2022")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
