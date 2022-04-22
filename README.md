@@ -13,3 +13,11 @@ From here, you can easily find out what mods belong where and additionally, when
 
 With love,
 SynthKitten
+
+# Troubleshooting
+
+If you have any issues with the program, please try the following:
+
+1. Make sure you have not frozen the application by checking if it says 'Select' in the top left. Type something to unfreeze the window.
+2. If you press enter and nothing happens, something IS happening! It's just loading and preparing its tasks. You will be notified when it's done.
+3. If no files are being written while the program is working, try administrator mode.
